@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Prediction</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <h1>Car Price Prediction</h1>
+    <form id="car-form">
+        <label for="Present_Price">Present Price:</label>
+        <input type="number" id="Present_Price" name="Present_Price" step="0.01" required>
+        <br>
+
+        <label for="Kms_Driven">Kms Driven:</label>
+        <input type="number" id="Kms_Driven" name="Kms_Driven" required>
+        <br>
+
+        <label for="Fuel_Type">Fuel Type:</label>
+        <select id="Fuel_Type" name="Fuel_Type" required>
+            <!-- Options will be loaded here -->
+        </select>
+        <br>
+
+        <label for="Seller_Type">Seller Type:</label>
+        <select id="Seller_Type" name="Seller_Type" required>
+            <!-- Options will be loaded here -->
+        </select>
+        <br>
+
+        <label for="Transmission">Transmission:</label>
+        <select id="Transmission" name="Transmission" required>
+            <!-- Options will be loaded here -->
+        </select>
+        <br>
+
+        <label for="Owner">Owner:</label>
+        <select id="Owner" name="Owner" required>
+            <option value="0">0</option>
+            <option value="1">1</option>
+        </select>
+        <br>
+
+        <button type="submit">Predict Price</button>
+    </form>
+
+    <h2>Predicted Price: <span id="predicted-price">N/A</span></h2>
+
+    <script>
+        $(document).ready(function() {
+            // Load dropdown options
+            function loadOptions(endpoint, elementId) {
+                $.getJSON(endpoint, function(data) {
+                    var options = data.map(function(item) {
+                        return `<option value="${item}">${item}</option>`;
+                    });
+                    $(elementId).append(options);
+                });
+            }
+
+            loadOptions('/fuel_options', '#Fuel_Type');
+            loadOptions('/seller_options', '#Seller_Type');
+            loadOptions('/transmission_options', '#Transmission');
+
+            // Handle form submission
+            $('#car-form').submit(function(event) {
+                event.preventDefault();
+
+                var formData = $(this).serialize();
+
+                $.post('/prediction', formData, function(data) {
+                    $('#predicted-price').text(data);
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+                    console.error("Request failed: " + textStatus + ", " + errorThrown);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
